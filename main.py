@@ -16,14 +16,21 @@ GRAVITY_CONST = 10
 TAIL_LENGTH = 20
 TAIL_WIDTH = 3
 PLANET_RADIUS = 50
+NUM_PLANETS = 3  # change this to change the number of planets
 
 # Create game window
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("2D Galaxy")
 
 # Create planet objects
-planets = [Planet(WIDTH//4, HEIGHT//2, PLANET_RADIUS, WIDTH, HEIGHT),
-           Planet(WIDTH*3//4, HEIGHT//2, PLANET_RADIUS, WIDTH, HEIGHT)]
+planets = []
+for i in range(NUM_PLANETS):
+    mass = random.randint(50, 200)
+    radius = mass // 5  # proportionate to mass
+    color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+    x = random.randint(radius, WIDTH - radius)
+    y = random.randint(radius, HEIGHT - radius)
+    planets.append(Planet(x, y, radius, mass, color, WIDTH, HEIGHT))
 
 # Create empty list to store comets
 comets = []
@@ -39,9 +46,20 @@ while running:
             # Create new comet on mouse click
             x, y = pygame.mouse.get_pos()
             comets.append(Comet(x, y, WIDTH, HEIGHT))
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+            # Reset game
+            planets = []
+            for i in range(NUM_PLANETS):
+                mass = random.randint(50, 200)
+                radius = mass // 5  # proportionate to mass
+                color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                x = random.randint(radius, WIDTH - radius)
+                y = random.randint(radius, HEIGHT - radius)
+                planets.append(Planet(x, y, radius, mass, color, WIDTH, HEIGHT))
+            comets = []
 
     # Fill screen with black
-    #screen.fill((0, 0, 0))
+    screen.fill((0, 0, 0))
 
     # Update and draw planets
     for planet in planets:
