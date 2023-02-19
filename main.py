@@ -1,77 +1,62 @@
 import pygame
 import random
+import math
 from planet import Planet
 from comet import Comet
-
-# Initialize Pygame
-pygame.init()
+from galaxy import Galaxy
 
 # Define game constants
 WIDTH = 1024
 HEIGHT = 1024
-COMET_RADIUS = 5
-COMET_SPEED = 5
 DIRECTIONS = list(range(360))
 GRAVITY_CONST = 10
-TAIL_LENGTH = 20
-TAIL_WIDTH = 3
-PLANET_RADIUS = 50
-NUM_PLANETS = 3  # change this to change the number of planets
+NUM_PLANETS = 5  # number of planets to generate
 
-# Create game window
+# Initialize Pygame
+pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("2D Galaxy")
+clock = pygame.time.Clock()
 
-# Create planet objects
-planets = []
-for i in range(NUM_PLANETS):
-    mass = random.randint(50, 200)
-    radius = mass // 5  # proportionate to mass
-    color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-    x = random.randint(radius, WIDTH - radius)
-    y = random.randint(radius, HEIGHT - radius)
-    planets.append(Planet(x, y, radius, mass, color, WIDTH, HEIGHT))
+# Create Galaxy object with planets
+galaxy = Galaxy(NUM_PLANETS, WIDTH, HEIGHT)
 
-# Create empty list to store comets
+# Game loop
 comets = []
-
-# Start game loop
 running = True
 while running:
-    # Handle events
+    clock.tick(30)  # limit frame rate to 60 FPS
+
+    # Event handling
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.MOUSEBUTTONUP:
-            # Create new comet on mouse click
-            x, y = pygame.mouse.get_pos()
-            comets.append(Comet(x, y, WIDTH, HEIGHT))
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-            # Reset game
-            planets = []
-            for i in range(NUM_PLANETS):
-                mass = random.randint(50, 200)
-                radius = mass // 5  # proportionate to mass
-                color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-                x = random.randint(radius, WIDTH - radius)
-                y = random.randint(radius, HEIGHT - radius)
-                planets.append(Planet(x, y, radius, mass, color, WIDTH, HEIGHT))
-            comets = []
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            # Create new comet on left mouse click
+            x, y = event.pos
+            comets.append(Comet(x, y))
 
-    # Fill screen with black
-    screen.fill((0, 0, 0))
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_r:
+                # Reset game on 'R' key press
+                comets = []
+                galaxy.clear()
+                galaxy.generate()
 
-    # Update and draw planets
-    for planet in planets:
-        planet.draw(screen)
-
-    # Update and draw comets
+    # Update comet positions
     for comet in comets:
-        comet.update(planets, comets)
+        comet.update(galaxy.planets, comets)
+        if comet.is_outside(WIDTH, HEIGHT):
+            comets.remove(comet)
+
+
+    # Draw objects
+    screen.fill((0, 0, 0))
+    for planet in galaxy.planets:
+        planet.draw(screen)
+    for comet in comets:
         comet.draw(screen)
+    pygame.display.flip()
 
-    # Update display
-    pygame.display.update()
-
-# Quit Pygame
+# Quit Pygame on exit
 pygame.quit()

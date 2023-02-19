@@ -11,14 +11,13 @@ TAIL_LENGTH = 20
 TAIL_WIDTH = 3
 
 class Comet:
-    def __init__(self, x, y, game_width, game_height):
+
+    def __init__(self, x, y):
         self.x = x
         self.y = y
         self.direction = random.choice(DIRECTIONS)
         self.history = []  # list of previous positions
         self.mass = COMET_RADIUS * 10  # set mass to 10 times the comet diameter
-        self.game_width = game_width
-        self.game_height = game_height
 
     def update(self, planets, comets):
         # Calculate movement vector
@@ -51,11 +50,6 @@ class Comet:
         if len(self.history) > TAIL_LENGTH:
             self.history.pop(0)
 
-        # Check if comet is outside game area and remove it
-        if self.x < -COMET_RADIUS or self.x > self.game_width + COMET_RADIUS or \
-           self.y < -COMET_RADIUS or self.y > self.game_height + COMET_RADIUS:
-            comets.remove(self)
-
     def draw(self, surface):
         # Create comet surface with tail and draw onto main surface
         comet_surf = pygame.Surface((COMET_RADIUS*2, COMET_RADIUS*2 + TAIL_LENGTH), pygame.SRCALPHA)
@@ -71,10 +65,9 @@ class Comet:
         # Draw comet with tail
         surface.blit(comet_surf, (self.x - COMET_RADIUS, self.y - COMET_RADIUS*2 - TAIL_LENGTH))
 
-
-class Planet:
-    def __init__(self, x, y, radius, game_width, game_height):
-        self.x = x
-        self.y = y
-        self.radius = radius
-        self.mass = math.pi * radius ** 2 * 10  # set mass to
+    def is_outside(self, WIDTH, HEIGHT):
+        #is the comet in the given box?
+        if self.x < 0 or self.x > WIDTH or self.y < 0 or self.y > HEIGHT:
+            return True
+        else:
+            return False
